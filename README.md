@@ -6,7 +6,7 @@ One way isn't necessarily better than the other. Both JavaScript and XSLT are fu
 
 We're going to look at one scenario where CETEIcean works very well: presenting static TEI source documents using GitHub Pages. If you set it up right, you can collaboratively edit a source file on GitHub and then immediately see your changes when you push them, without having to do any extra work. I've chosen at random an example from EDH, <https://edh-www.adw.uni-heidelberg.de/edh/inschrift/HD000102>. The source is available on GitHub at <https://github.com/epigraphic-database-heidelberg/data/blob/master/inscriptions/1/1/HD000102.xml>, and the "raw" version (i.e. just the XML) at <https://raw.githubusercontent.com/epigraphic-database-heidelberg/data/master/inscriptions/1/1/HD000102.xml>.
 
-The simplest way to use CETEIcean is to simply create an HTML file that will link to the JavaScript and CSS you need and then load (using JavaScript) the XML source you want and insert it into the document when a browser loads the HTML page. Unlike XLST, CETEIcean works by directly converting the source file's EpiDoc XML into HTML Custom Elements, so, for example, 
+The simplest way to use CETEIcean is to simply create an HTML file that will link to the JavaScript and CSS you need and then load (using JavaScript) the XML source you want and insert it into the document when a browser loads the HTML page. Unlike XSLT, CETEIcean works by directly converting the source file's EpiDoc XML into HTML Custom Elements, so, for example, 
 
 ```xml
 <origin xmlns="http://www.tei-c.org/ns/1.0">
