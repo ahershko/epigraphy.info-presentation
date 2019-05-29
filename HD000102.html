@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>HD000102</title>
+  <link rel="stylesheet" href="css/EDH.css">
+  <script src="js/CETEI.js"></script>
+  <script>
+    let c = new CETEI();
+    c.addBehaviors({
+        "tei": {
+          "certainty": [
+            ["[cert=low]", ["","?"]] // put a '?' after certainty tag
+          ],
+          "div": [ // set up headers for different div types
+            ["[type=textpart]", ["<div><h2 class=\"textpart\">$@n</h2>","</div>"]],
+            ["[type=bibliography]", ["<div><h2 class=\"textpart\">$@type</h2>","</div>"]],
+            ["[type=commentary]", ["<div><h2 class=\"textpart\">$@type</h2>","</div>"]]
+        ],
+          "ex": [
+            ["tei-expan>tei-ex", ["(",")"]] // wrap ex in parentheses
+          ],
+          "gap": [
+            ["[reason=lost][unit=character]", function(elt) {
+              var tmp = document.createElement("span");
+              if (elt.hasAttribute("quantity")) {
+                tmp.innerHTML = "[" + this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity"))) + "]";
+              } else {
+                tmp.innerHTML = "[---]";
+              }
+              return tmp;
+            }],
+            ["[reason=illegible][unit=character]", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity")));
+              return tmp;
+            }]
+          ],
+          "lb": function(elt) {
+              var tmp = document.createElement("span");
+              if (elt.hasAttribute("break")) { // hyphenate word-breaking lbs
+                tmp.innerHTML = "-"
+              }
+              var n = elt.getAttribute("n");
+              tmp.innerHTML += "<br> ";
+              if (n % 5 == 0 || isNaN(n)) { // print line numbers every 5 lines (or 1a, etc.)
+                tmp.innerHTML += "<span class=\"linenum\">" + n + "</span>";
+              }
+              return tmp;
+            },
+          "supplied": [
+            ["[reason=lost]", ["[","]"]],
+            ["[reason=omitted]", ["&lt;","&gt;"]]
+        ],
+          "unclear": function(elt) {
+            var tmp = document.createElement("span");
+            tmp.innerHTML = elt.innerHTML.replace(/(.)/g, "$1\u0323"); // put an underdot next to each character
+            return tmp;
+          }
+        }
+      });
+      c.getHTML5("HD000102.xml", // get the corrected version of HD000102
+        function(data) {
+          // put things in the right order
+          let edition = data.querySelector("tei-div[type=edition]");
+          let commentary = data.querySelector("tei-div[type=commentary]");
+          let bibliography = data.querySelector("tei-div[type=bibliography]");
+          document.getElementsByTagName("body")[0].appendChild(edition);
+          // Clean up adjacent ][
+          var tmp = document.evaluate("//tei-div[@type='edition']//text()[not(parent::span[@data-original])]",document,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE,null);
+          var spans = [];
+          var n;
+          while (n = tmp.iterateNext()) {
+            spans.push(n);
+          }
+          for (var i = 0; i < spans.length; i++) {
+            if (spans[i].nodeValue.endsWith("]") && spans[i+1] && spans[i+1].nodeValue.startsWith("[")) {
+              spans[i].nodeValue = spans[i].nodeValue.replace(/\]$/, "");
+              spans[i+1].nodeValue = spans[i+1].nodeValue.replace(/^\[/, "");
+            }
+          }
+          document.getElementsByTagName("body")[0].appendChild(commentary);
+          document.getElementsByTagName("body")[0].appendChild(bibliography);
+        });
+  </script>
+</head>
+<body>
+  
+</body>
+</html>

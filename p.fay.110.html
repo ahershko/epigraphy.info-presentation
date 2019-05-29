@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/papyri.info.css" media="screen" title="no title" charset="utf-8">
+    <script src="js/CETEI.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      var c = new CETEI();
+      var hasAncestor = function(node, elt) {
+        if (!node.parentElement) return false;
+        if (node.parentElement === elt) return true;
+        return hasAncestor(node.parentElement, elt);
+      }
+      var prevUntil = function(node, str) {
+        var prev = document.evaluate("preceding::text()[not(parent::*/@data-original)][1]",node,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue;
+        if (prev && hasAncestor(prev, node.parentElement)) {
+          if (prev.nodeValue.includes(str)) {
+            return prev.nodeValue.substring(prev.nodeValue.lastIndexOf(str));
+          } else {
+            return prevUntil(prev, str) + prev.nodeValue;
+          }
+        }
+        return "";
+      }
+      var nextUntil = function(node, str) {
+        var next = document.evaluate("following::text()[not(parent::*/@data-original)][1]",node,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue;
+        if (next && hasAncestor(next, node.parentElement)) {
+          if (next.nodeValue.includes(str)) {
+            return next.nodeValue.substring(0,next.nodeValue.indexOf(str));
+          } else {
+            return next.nodeValue + nextUntil(next, str);
+          }
+      }
+        return "";
+      }
+      var getLine = function(e) {
+        var textpart = document.evaluate("ancestor::tei-div[@type='textpart'][1]/@n",e,null,XPathResult.STRING_TYPE,null).stringValue;
+        var line = document.evaluate("preceding::tei-lb[1]/@n",e,null,XPathResult.STRING_TYPE,null).stringValue;
+        var result = textpart + "." + line;
+        var lb;
+        if (lb = e.querySelector("tei-lb")) {
+          result += "–" + lb.getAttribute("n");
+        }
+        return result;
+      }
+      c.addBehaviors({
+        "tei": {
+          "app": [
+            ["div.apparatus tei-app", function(elt) {
+              if (elt.querySelector("tei-lem").querySelector("tei-hi")) {
+                var tmp = document.createElement("div");
+                var result = document.createElement("span");
+                tmp.setAttribute("class","apparatus");
+                this.attach(tmp, "appendChild", this.copyAndReset(elt));
+                tmp.innerHTML = tmp.firstChild.innerHTML;
+                result.innerHTML = tmp.innerHTML + " : " + tmp.querySelector("tei-lem>span[data-original]").innerHTML + " papyrus";
+                return result;
+              }
+            }]
+          ],
+          "div": [
+            ["[type=textpart]", ["<div><h2 class=\"textpart\">$@n</h2>","</div>"]]
+          ],
+          "ex": [
+            ["tei-expan>tei-ex", ["(",")"]]
+          ],
+          "gap": [
+            ["[reason=lost][unit=character]", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = "[" + this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity"))) + "]";
+              return tmp;
+            }],
+            ["[reason=illegible][unit=character]", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity")));
+              return tmp;
+            }]
+          ],
+          "hi": [
+            ["tei-ab tei-hi[rend=diaeresis]", function(elt) {
+              var tmp = "";
+              var prev = prevUntil(elt," ");
+              if (/\S/.test(prev)) {
+                tmp = prev;
+              }
+              tmp += elt.innerHTML.normalize("NFD").replace(/[\u0300-\u036F]/g, "") + "\u0308";
+              var next = nextUntil(elt, " ");
+              if (/\S/.test(next)) {
+                tmp += next;
+              }
+              elt.setAttribute("data-hi-tmp",tmp);
+            }],
+            ["div.apparatus>p>tei-hi[rend]", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = elt.getAttribute("data-hi-tmp") + " papyrus";
+              return tmp;
+            }],
+            ["div.apparatus tei-lem tei-hi", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = elt.innerHTML.normalize("NFD").replace(/[\u0300-\u036F]/g, "") + "\u0308";
+              return tmp;
+
+            }]
+          ],
+          "lb": [
+            ["tei-ab>tei-lb:first-child", [""]],
+            ["div.apparatus tei-lb", ["|"]],
+            ["_", function(elt) {
+              var tmp = document.createElement("span");
+              if (elt.hasAttribute("break")) {
+                tmp.innerHTML = "-"
+              }
+              var n = elt.getAttribute("n");
+              tmp.innerHTML += "<br>";
+              if (n % 5 == 0 || isNaN(n)) {
+                tmp.innerHTML += "<span class=\"linenum\">" + n + "</span>";
+              }
+              return tmp;
+            }]
+          ],
+          "lem": [
+            ["div.apparatus tei-lem", function(elt) {
+              var tmp = document.createElement("span");
+              tmp.innerHTML = elt.getAttribute("resp") + " : ";
+              return tmp;
+            }]
+          ],
+          "rdg": [
+            ["div.apparatus tei-rdg", ["", " prev. ed."]]
+          ],
+          "reg": [
+            ["div.apparatus tei-choice>tei-reg", ["l. ","."]]
+          ],
+          "supplied": [
+            ["[reason=lost]", ["[","]"]],
+            ["[reason=omitted]", ["&lt;","&gt;"]]
+          ],
+          "unclear": function(elt) {
+            var tmp = document.createElement("span");
+            tmp.innerHTML = elt.innerHTML.replace(/(.)/g, "$1\u0323");
+            return tmp;
+          }
+        }
+      });
+      c.getHTML5('https://papyri.info/ddbdp/p.fay;;110/source', function(data) {
+        document.getElementsByTagName("body")[0].appendChild(data);
+        // Clean up spacing
+        for (var e of document.querySelectorAll("tei-lb")) {
+          if (e.previousSibling && e.previousSibling.nodeType === Node.TEXT_NODE) {
+            e.previousSibling.nodeValue = e.previousSibling.nodeValue.replace(/\s+$/,"");
+          }
+        }
+        // Build apparatus
+        var apparatus = document.createElement("div");
+        apparatus.setAttribute("class","apparatus");
+        apparatus.innerHTML = "<h2>Apparatus</h2>";
+        for (var e of data.querySelectorAll("tei-app,tei-hi,tei-choice")) {
+          if (e.offsetParent !== null && !e.matches("tei-app tei-hi")) {
+            var p = document.createElement("p");
+            apparatus.appendChild(p);
+            p.innerHTML = "<span>" + getLine(e) + ".</span> ";
+            var foo = c.copyAndReset(e);
+            p.appendChild(foo);
+          }
+        }
+        c.attach(document.getElementsByTagName("body")[0], "appendChild", apparatus);
+        // Clean up adjacent ][
+        var tmp = document.evaluate("//tei-text//span[not(@data-original)]/text()",document,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE,null);
+        var spans = [];
+        var n;
+        while (n = tmp.iterateNext()) {
+          spans.push(n);
+        }
+        for (var i = 0; i < spans.length; i++) {
+          if (spans[i].nodeValue.endsWith("]") && spans[i+1] && spans[i+1].nodeValue.startsWith("[")) {
+            spans[i].nodeValue = spans[i].nodeValue.replace(/\]$/, "");
+            spans[i+1].nodeValue = spans[i+1].nodeValue.replace(/^\[/, "");
+          }
+        }
+      });
+    </script>
+    <title>P.Fay 110</title>
+  </head>
+  <body>
+  </body>
+</html>

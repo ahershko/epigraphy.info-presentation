@@ -1,0 +1,33 @@
+body {
+  font-family: "Lucida Grande", "Cardo", "Arial Unicode MS";
+}
+tei-teiheader {
+  display: none;
+}
+tei-listbibl tei-bibl {
+  display: block;
+}
+tei-div {
+  display: block;
+}
+tei-div[type=edition] {
+  margin-left: 4em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+tei-div[type=edition]>tei-head {
+  margin-left: -2em;
+  font-size: 200%;
+}
+tei-p {
+  display: block;
+}
+tei-div[type=edition] h2.textpart {
+  margin-left: -2em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+span.linenum {
+  float:left;
+  margin-left: -2em;
+}
