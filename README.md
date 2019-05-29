@@ -1,6 +1,6 @@
 # Introducing CETEIcean for EpiDoc
 
-If you've used EpiDoc much, you're probably also familiar with the way we usually turn it into something you can read with a web browser: XSLT. This process takes an XML file and outputs HTML, and in the process reformats the input as needed. CETEIcean acheives the same end goal in a different way, one that lets the web browser do the work, using JavaScript and CSS, instead of requiring that you convert the sources ahead of time. 
+If you've used EpiDoc much, you're probably also familiar with the way we usually turn it into something you can read with a web browser: XSLT. This process takes an XML file and outputs HTML, and in the process reformats the input as needed. [CETEIcean](https://github.com/TEIC/CETEIcean) achieves the same end goal in a different way, one that lets the web browser do the work, using JavaScript and CSS, instead of requiring that you convert the sources ahead of time. 
 
 One way isn't necessarily better than the other. Both JavaScript and XSLT are fully-functional programming languages, and are therefore more-or-less equivalent in what they can do. But their particular strengths may work better in one situation or another. CETEIcean is particularly good in situations where you don't want to either convert all your XML ahead of time or lack the resources to do it on the fly. It also sidesteps some of the issues XSLT has: most programming languages only support the much older and less powerful XSLT 1.0; powerful as it is, it's a bit of a niche language, and you might have an easier time finding someone who can work in JavaScript than XSLT; it can be resource-intensive.
 
@@ -37,3 +37,5 @@ I've also given you a papyrus example, [P.Fay 110](https://hcayless.github.io/ep
 Finally, [HD000102](https://hcayless.github.io/epigraphy.info-presentation/HD000102.html) ([source](https://github.com/hcayless/epigraphy.info-presentation/blob/master/docs/HD000102.html)) shows an example of re-ordering the elements in the text, and may give you ideas on how you might grab and display information in the header. You can figure out where the rendering problem is by comparing this with the original. What I'd like to invite you to do now is to create a GitHub account if you don't already have one, and to fork this repo, set up GitHub pages by going to "settings", scrolling down to "GitHub Pages", and choosing "master branch /docs folder" under "Source". That should give you a copy you can play with. (Note: You may notice a small lag between your making changes and those changes appearing on your page)
 
 Happy hacking!
+
+For more info and examples, see [Cayless & Viglianti 2018](https://www.balisage.net/Proceedings/vol21/html/Cayless01/BalisageVol21-Cayless01.html).
