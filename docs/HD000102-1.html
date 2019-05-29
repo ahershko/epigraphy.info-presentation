@@ -63,11 +63,7 @@
       });
       c.getHTML5("https://raw.githubusercontent.com/epigraphic-database-heidelberg/data/master/inscriptions/1/1/HD000102.xml", 
         function(data) {
-          // put things in the right order
-          let edition = data.querySelector("tei-div[type=edition]");
-          let commentary = data.querySelector("tei-div[type=commentary]");
-          let bibliography = data.querySelector("tei-div[type=bibliography]");
-          document.getElementsByTagName("body")[0].appendChild(edition);
+          document.getElementsByTagName("body")[0].appendChild(data);
           // Clean up adjacent ][
           var tmp = document.evaluate("//tei-div[@type='edition']//text()[not(parent::span[@data-original])]",document,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE,null);
           var spans = [];
@@ -81,8 +77,6 @@
               spans[i+1].nodeValue = spans[i+1].nodeValue.replace(/^\[/, "");
             }
           }
-          document.getElementsByTagName("body")[0].appendChild(commentary);
-          document.getElementsByTagName("body")[0].appendChild(bibliography);
         });
   </script>
 </head>
