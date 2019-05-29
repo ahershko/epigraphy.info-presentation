@@ -24,7 +24,7 @@
           ],
           "gap": [
             ["[reason=lost][unit=character]", function(elt) {
-              var tmp = document.createElement("span");
+              let tmp = document.createElement("span");
               if (elt.hasAttribute("quantity")) {
                 tmp.innerHTML = "[" + this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity"))) + "]";
               } else {
@@ -33,17 +33,17 @@
               return tmp;
             }],
             ["[reason=illegible][unit=character]", function(elt) {
-              var tmp = document.createElement("span");
+              let tmp = document.createElement("span");
               tmp.innerHTML = this.repeat(" ̣", Number.parseInt(elt.getAttribute("quantity")));
               return tmp;
             }]
           ],
           "lb": function(elt) {
-              var tmp = document.createElement("span");
+              let tmp = document.createElement("span");
               if (elt.hasAttribute("break")) { // hyphenate word-breaking lbs
                 tmp.innerHTML = "-"
               }
-              var n = elt.getAttribute("n");
+              let n = elt.getAttribute("n");
               tmp.innerHTML += "<br> ";
               if (n % 5 == 0 || isNaN(n)) { // print line numbers every 5 lines (or 1a, etc.)
                 tmp.innerHTML += "<span class=\"linenum\">" + n + "</span>";
@@ -55,7 +55,7 @@
             ["[reason=omitted]", ["&lt;","&gt;"]]
         ],
           "unclear": function(elt) {
-            var tmp = document.createElement("span");
+            let tmp = document.createElement("span");
             tmp.innerHTML = elt.innerHTML.replace(/(.)/g, "$1\u0323"); // put an underdot next to each character
             return tmp;
           }
@@ -65,13 +65,13 @@
         function(data) {
           document.getElementsByTagName("body")[0].appendChild(data);
           // Clean up adjacent ][
-          var tmp = document.evaluate("//tei-div[@type='edition']//text()[not(parent::span[@data-original])]",document,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE,null);
-          var spans = [];
-          var n;
+          let tmp = document.evaluate("//tei-div[@type='edition']//text()[not(parent::span[@data-original])]",document,null,XPathResult.ORDERED_NODE_ITERATOR_TYPE,null);
+          let spans = [];
+          let n;
           while (n = tmp.iterateNext()) {
             spans.push(n);
           }
-          for (var i = 0; i < spans.length; i++) {
+          for (let i = 0; i < spans.length; i++) {
             if (spans[i].nodeValue.endsWith("]") && spans[i+1] && spans[i+1].nodeValue.startsWith("[")) {
               spans[i].nodeValue = spans[i].nodeValue.replace(/\]$/, "");
               spans[i+1].nodeValue = spans[i+1].nodeValue.replace(/^\[/, "");
